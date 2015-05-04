@@ -348,7 +348,7 @@ class Profile(MyriaPage):
         # Actually render the page: HTML content
         self.response.headers['Content-Type'] = 'text/html'
         # .. load and render the template
-        template = JINJA_ENVIRONMENT.get_template('visualization.html')
+        template = JINJA_ENVIRONMENT.get_template('execution.html')
         self.response.out.write(template.render(template_vars))
 
 
