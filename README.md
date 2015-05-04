@@ -21,11 +21,11 @@ The [Myria](http://myria.cs.washington.edu) database management system leverages
 
 Accordingly, the installation process requires the following steps:
 
-#### Prerequisites
+### Prerequisites
 
 1. Install the [Google App Engine SDK for Python](https://developers.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python)
 
-#### Installation
+### Installation
 
 1. Clone this [repository](https://github.com/CSE512-15S/a3-haynesb) (`git clone https://github.com/CSE512-15S/a3-haynesb.git`)
 2. Update repository submodules (`git submodule init` and `git submodule update`)
@@ -34,26 +34,29 @@ Accordingly, the installation process requires the following steps:
 5. Execute a query (`http://localhost:8080/editor`), making sure to select the profiling option
 6. View query profiling results
 
-#### Demo
+### Demo
 
-A [demo](http://ec2-52-7-96-241.compute-1.amazonaws.com/editor) of the dynamic query visualization is also available.  Some pre-profiled queries:
+A [demo](http://ec2-52-4-143-15.compute-1.amazonaws.com/editor) of the dynamic query visualization is also available.  Some pre-profiled queries:
 
-1. [Finding all two-vertex sequences on a circumscribed Twitter connection graph](http://ec2-52-7-96-241.compute-1.amazonaws.com/execution?queryId=41) (5 seconds)
-2. [Nested Cross-Products](http://ec2-52-7-96-241.compute-1.amazonaws.com/profile?queryId=95) (53 seconds)
-1. [Four Hops in Twitter Graph]()
+#### [Finding all three-vertex sequences on a circumscribed Twitter connection graph](http://ec2-52-4-143-15.compute-1.amazonaws.com/profile?queryId=474) (7 seconds)
+
+```Python
 T1 = scan(TwitterK);
 T2 = scan(TwitterK);
-T3 = scan(TwitterK);
 
-Joined = [from T1, T2, T3
-          where T1.$1 = T2.$0 and T2.$1 = T3.$0
+Joined = [from T1, T2
+          where T1.$1 = T2.$0
           emit T1.$0 as src,
                T2.$0 as first_link,
-               T3.$0 as second_link,
-               T3.$1 as destination];
-store(Joined, ThreeHopsInTwitter);
+               T2.$1 as destination];
+store(Joined, TwoHopsInTwitter);
+```
 
-2. [Nested Cross Products](http://todo.com)
+[Visualization](http://ec2-52-4-143-15.compute-1.amazonaws.com/profile?queryId=474) (5 seconds)
+
+#### [Nested Cross-Products](http://ec2-52-4-143-15.compute-1.amazonaws.com/execution?queryId=9) (53 seconds)
+
+```Python
 T1 = scan(TwitterK);
 T2 = empty(x:int);
 
@@ -61,9 +64,29 @@ T2 = T2 + [from T1,T1 as x emit $0 as x];
 T2 = T2 + [from T1,T1 as x emit $0 as x];
 
 store(T2, JustX);
+```
 
+[Visualization](http://ec2-52-4-143-15.compute-1.amazonaws.com/execution?queryId=9) (53 seconds)
 
-TODO: If you put your work online, please also write a [one-line description and add a link to your final work](http://note.io/1n3u46s) so people can access it directly from the CSE512-15S page.
+#### [Join Insanity!](http://ec2-52-4-143-15.compute-1.amazonaws.com/profile?queryId=560) (3 minutes)
+
+```Python
+T1 = scan(TwitterK);
+T2 = scan(TwitterK);
+T3 = scan(TwitterK);
+T4 = scan(TwitterK);
+
+Joined = [from T1, T2, T3, T4
+          where T1.$1 = T2.$0 and T2.$1 = T3.$0 and T3.$1 = T4.$0
+          emit T1.$0 as src,
+               T2.$0 as first_link,
+               T3.$0 as second_link,
+               T4.$0 as third_link,
+               T4.$1 as destination];
+store(Joined, ThreeHopsInTwitter);
+```
+
+[Visualization](http://ec2-52-4-143-15.compute-1.amazonaws.com/profile?queryId=560) (3 minutes)
 
 ## Storyboard
 
