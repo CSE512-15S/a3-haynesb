@@ -1,4 +1,4 @@
-function ProfilingAggregation (templates, myriaConnection, graph) {
+function ProfilingAggregation (templates, connectionUrl, graph) {
     "use strict";
 
     var dataCache = {};
@@ -13,7 +13,7 @@ function ProfilingAggregation (templates, myriaConnection, graph) {
                            graph, fragment));
         else {
             var url = templates.urls.profiling({
-                myria: myriaConnection,
+                myria: connectionUrl,
                 query: graph.queryStatus.queryId,
                 subquery: graph.queryStatus.subqueryId,
                 fragment: fragmentId,
