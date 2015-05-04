@@ -38,8 +38,6 @@ Accordingly, the installation process requires the following steps:
 
 A [demo](http://ec2-52-4-143-15.compute-1.amazonaws.com/editor) of the dynamic query visualization is also available.  Some pre-profiled queries:
 
-[Visualization](http://ec2-52-4-143-15.compute-1.amazonaws.com/profile?queryId=474) (5 seconds)
-
 #### [Nested Cross-Products](http://ec2-52-4-143-15.compute-1.amazonaws.com/execution?queryId=9) (53 seconds)
 
 ```Python
@@ -51,8 +49,6 @@ T2 = T2 + [from T1,T1 as x emit $0 as x];
 
 store(T2, JustX);
 ```
-
-[Visualization](http://ec2-52-4-143-15.compute-1.amazonaws.com/execution?queryId=9) (53 seconds)
 
 #### [Join Insanity!](http://ec2-52-4-143-15.compute-1.amazonaws.com/profile?queryId=560) (3 minutes)
 
@@ -71,8 +67,6 @@ Joined = [from T1, T2, T3, T4
                T4.$1 as destination];
 store(Joined, FourHopsInTwitter);
 ```
-
-[Visualization](http://ec2-52-4-143-15.compute-1.amazonaws.com/profile?queryId=560) (3 minutes)
 
 #### [Finding all three-vertex sequences on a circumscribed Twitter connection graph](http://ec2-52-4-143-15.compute-1.amazonaws.com/profile?queryId=474) (7 seconds)
 
