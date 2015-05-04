@@ -93,7 +93,7 @@ function GraphAnimation (graph, scales, animationDuration, arrowSize, markerSize
     function updateSkew(profiling, fragment, d) {
         d.skews = d.skews || _.fill(new Array(moving_average_skew_slots), 0);
 
-        var workers = graph.nodes['f' + fragment.fragmentIndex].workers.length + 2;
+        var workers = graph.nodes['f' + fragment.fragmentIndex].workers.length;
         var tuples_per_worker = _.reduce(
                 profiling[d.src],
                 function(a, c) {

@@ -36,10 +36,32 @@ Accordingly, the installation process requires the following steps:
 
 #### Demo
 
-A [demo version](asdf) of the dynamic query visualization is also available.  Some pre-profiled queries:
+A [demo](http://ec2-52-7-96-241.compute-1.amazonaws.com/editor) of the dynamic query visualization is also available.  Some pre-profiled queries:
 
-1. [Cross Products](http://todo.com)
-2. ... others ...
+1. [Finding all two-vertex sequences on a circumscribed Twitter connection graph](http://ec2-52-7-96-241.compute-1.amazonaws.com/execution?queryId=41) (5 seconds)
+2. [Nested Cross-Products](http://ec2-52-7-96-241.compute-1.amazonaws.com/profile?queryId=95) (53 seconds)
+1. [Four Hops in Twitter Graph]()
+T1 = scan(TwitterK);
+T2 = scan(TwitterK);
+T3 = scan(TwitterK);
+
+Joined = [from T1, T2, T3
+          where T1.$1 = T2.$0 and T2.$1 = T3.$0
+          emit T1.$0 as src,
+               T2.$0 as first_link,
+               T3.$0 as second_link,
+               T3.$1 as destination];
+store(Joined, ThreeHopsInTwitter);
+
+2. [Nested Cross Products](http://todo.com)
+T1 = scan(TwitterK);
+T2 = empty(x:int);
+
+T2 = T2 + [from T1,T1 as x emit $0 as x];
+T2 = T2 + [from T1,T1 as x emit $0 as x];
+
+store(T2, JustX);
+
 
 TODO: If you put your work online, please also write a [one-line description and add a link to your final work](http://note.io/1n3u46s) so people can access it directly from the CSE512-15S page.
 
