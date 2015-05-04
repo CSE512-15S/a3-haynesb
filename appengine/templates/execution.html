@@ -74,7 +74,7 @@
             var updateInterval = 0.5;
             var scales = {
                 strokeWidth: d3.scale.linear().range([2, 9]).clamp(true),
-                strokeDash: d3.scale.linear().range([6, 0]).domain([0, .8]).clamp(true),
+                strokeDash: d3.scale.linear().range([6, 0]).domain([0, .1]).clamp(true),
                 timeColor: d3.scale.linear().domain([0, updateInterval * nanosPerUnit])
                                             .interpolate(d3.interpolateHsl)
                                             .range(["black", d3.rgb(128, 0, 38)])
