@@ -69,7 +69,7 @@ Joined = [from T1, T2, T3, T4
                T3.$0 as second_link,
                T4.$0 as third_link,
                T4.$1 as destination];
-store(Joined, ThreeHopsInTwitter);
+store(Joined, FourHopsInTwitter);
 ```
 
 [Visualization](http://ec2-52-4-143-15.compute-1.amazonaws.com/profile?queryId=560) (3 minutes)
