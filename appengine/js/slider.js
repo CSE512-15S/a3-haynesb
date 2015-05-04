@@ -78,10 +78,12 @@ function BrushSlider (domain, interval, onInterval, onValueChanged) {
                  if (d3.event.sourceEvent)
                     value = scale.invert(d3.mouse(this)[0]);
                  setValue(value); })
-              //.on("brushend", function() {
-               //  d3.event.target.clear();
-             //    d3.select(this).call(d3.event.target);
-             //});
+              .on("brushend", function() {
+                 if (d3.event.sourceEvent)
+                    value = scale.invert(d3.mouse(this)[0]);
+                 setValue(value);
+                 d3.event.target.clear();
+                 d3.select(this).call(d3.event.target); });
 
         var group = container.attr("width", container.node().getBoundingClientRect().width)
                              .attr("height", height + margin.top  + margin.bottom)
