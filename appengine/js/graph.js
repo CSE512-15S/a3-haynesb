@@ -1,12 +1,13 @@
 //query graph and profiling charts
-var queryGraphInteractive = function (element, queryStatus, fragments) {
+var queryGraphInteractive = function (element, queryStatus, fragments, callback) {
     var chartElement = d3.select('.chart');
 
     var graphObj = new Graph();
     graphObj.loadQueryPlan(queryStatus, fragments);
     graphObj.loadCosts(function() {
-        graphObj.render(element, chartElement);
-        graphObj.openOverview();
+        svg = graphObj.render(element, chartElement);
+//        graphObj.openOverview();
+        callback(graphObj, svg);
     });
     return graphObj;
 };
@@ -266,7 +267,7 @@ function Graph () {
         var dotStr = graph.generateDot();
 
         // Generate plain graph description
-        return Viz(dotStr, "plain");
+        return Viz(dotStr, "plain", ["-s500"]);
     };
 
     // D3 data generator
@@ -464,7 +465,8 @@ function Graph () {
                     .attr("class", "query-graph")
                     .call(zoom);
         var wrapper = svg
-                    .append("g");
+                    .append("g")
+                    .attr("transform", "translate(0, 50)");
         var gel = wrapper.append("g"); // avoid jitter
 
         function onzoom() {
@@ -542,17 +544,20 @@ function Graph () {
              *
              * Consequence: we need to set the height based on the bootstrap width and the aspect ratio.
              */
+            height = d3.select('html').node().getBoundingClientRect().height - 100;
             svg
-                .style("height", (width * data.height / data.width) + "px");
+                .style("height", height + "px");
+                //.style("height", (width * data.height / data.width - height_adjustment) + "px");
 
             gel
                 .attr("height", data.height*dpi)
                 .attr("width", data.width*dpi);
 
-            graphElement.style("height", (width * data.height / data.width + 15) + "px");
+            graphElement.style("height", height + "px");
+            //graphElement.style("height", (width * data.height / data.width + 15 - height_adjustment) + "px");
 
             if (initial) {
-                var scale = width/(data.width*dpi + 10);
+                var scale = (width*.5)/(data.width*dpi + 10);
                 if (scale < 1) {
                     zoom.scale(scale);
                 }
@@ -630,14 +635,16 @@ function Graph () {
                 .attr("cx", function(d) { return d.x * dpi; })
                 .attr("cy", function(d) { return d.y * dpi; });
 
-            node.select(".node-rect").transition().duration(animationDuration)
+            node.select(".node-rect") //.transition().duration(animationDuration)
                 .attr("opacity", 1)
                 .attr("x", function(d) { return d.x * dpi; })
                 .attr("y", function(d) { return d.y * dpi; })
                 .attr("width", function(d) { return d.w * dpi; })
                 .attr("height", function(d) { return d.h * dpi; })
                 .attr("fill", function(d) { return d.color; })
-                .attr("stroke", function(d) { return d.stroke; });
+                .attr("stroke", function(d) { return d.stroke; })
+                .style("stroke", null)
+                .style("stroke-width", null);
 
             var nodeLabel = nodeEnter.append("g").attr("class", "node-label");
 
@@ -731,8 +738,8 @@ function Graph () {
                 })
                 .attr("refX", 2)
                 .attr("refY", 2)
-                .attr("markerWidth", 6)
-                .attr("markerHeight", 4)
+                .attr("markerWidth", 60)
+                .attr("markerHeight", 40)
                 .attr("orient", "auto")
                 .attr("fill-opacity", 1)
                 .append("path")
@@ -743,8 +750,9 @@ function Graph () {
                     return d.stroke;
                 });
 
-            link.select("path.line").transition().duration(animationDuration)
-                .attr("d", function(d) { return line(d.points); })
+            link.select("path.line") //.transition().duration(animationDuration)
+                .attr("d", function(d) {
+                    return interpolateSpline(line, d.points); })
                 .attr("stroke", function(d) { return d.stroke; })
                 .attr("marker-end", function(d) { return templates.markerUrl({ name: d.id });})
                 .attr("stroke-width", function(d) {
@@ -789,6 +797,7 @@ function Graph () {
         }
 
         Graph.prototype.draw = draw;
+        return svg;
     };
 
     Graph.prototype.openFragment = function(nodeId, focus) {
@@ -831,4 +840,27 @@ function Graph () {
         var allFragments = _.pluck(self.fragments, 'fragmentIndex');
         manyLineCharts(self.chartElement, allFragments, self);
     };
+
+    function interpolateSpline(line, points) {
+        splinePoints = new Array(4);
+        splinePoints[0] = points[0];
+        splinePoints[1] = [points[0][0], points[0][1] + (points[3][1] - points[0][1]) / 5];
+        splinePoints[2] = points[2];
+        splinePoints[3] = [points[3][0], points[3][1] - (points[3][1] - points[0][1]) / 5];
+        splinePoints[4] = points[3];
+
+        return alignMarker(line.interpolate("basis")(splinePoints));
+    }
+
+    // d3 Chokes on marker alignment for spline termination; work around this
+    // by introducing a linear terminator.  Boo.
+    function alignMarker(line) {
+        var curves = line.split("C");
+        var last = curves.pop();
+        var truncatedLine = curves.join("C");
+        var components = last.split("L")[0].split(",");
+        var terminator = "L" + components.slice(components.length - 2).join(',');
+
+        return truncatedLine + terminator;
+    }
 }
