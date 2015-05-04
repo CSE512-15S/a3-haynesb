@@ -352,6 +352,35 @@ class Profile(MyriaPage):
         self.response.out.write(template.render(template_vars))
 
 
+class Execution(MyriaPage):
+
+    def get(self):
+        conn = self.app.connection
+        query_id = self.request.get("queryId")
+        subquery_id = self.request.get("subqueryId", 0)
+        query_status = {}
+        subquery_fragments = None
+        if query_id != '':
+            try:
+                query_status = conn.get_query_status(query_id)
+                query_status["subqueryId"] = subquery_id
+                subquery_fragments = conn.get_query_plan(query_id, subquery_id)
+            except myria.MyriaError:
+                pass
+
+        template_vars = self.base_template_vars()
+        template_vars['queryStatus'] = json.dumps(query_status)
+        template_vars['fragments'] = json.dumps(subquery_fragments)
+        template_vars['queryId'] = query_id
+        template_vars['subqueryId'] = subquery_id
+
+        # Actually render the page: HTML content
+        self.response.headers['Content-Type'] = 'text/html'
+        # .. load and render the template
+        template = JINJA_ENVIRONMENT.get_template('execution.html')
+        self.response.out.write(template.render(template_vars))
+
+
 class Datasets(MyriaPage):
 
     def get(self, connection_=None):
@@ -624,6 +653,7 @@ class Application(webapp2.WSGIApplication):
             ('/editor', Editor),
             ('/queries', Queries),
             ('/profile', Profile),
+            ('/execution', Execution),
             ('/datasets', Datasets),
             ('/plan', Plan),
             ('/optimize', Optimize),

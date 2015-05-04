@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Myria Web Frontend</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+<!-- BEGIN mobile bookmark icons -->
+<!-- See: http://mathiasbynens.be/notes/touch-icons#sizes -->
+<link rel="apple-touch-icon-precomposed" sizes="152x152" href="apple-touch-icon-152x152-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="apple-touch-icon-144x144-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="120x120" href="apple-touch-icon-120x120-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="apple-touch-icon-114x114-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="76x76" href="apple-touch-icon-76x76-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="apple-touch-icon-72x72-precomposed.png">
+<link rel="apple-touch-icon-precomposed" href="apple-touch-icon-precomposed.png">
+<!-- END mobile bookmark icons -->
+
+<script type="text/javascript">
+    {% autoescape false %}
+    var myriaConnection = '{{ myriaConnection }}'; //'http://localhost:8773'; // todo '
+    var connectionString = '{{ connectionString }}';
+    {% endautoescape %}
+</script>
+
+<link rel="stylesheet" type="text/css" href="css/queryvis.css">
+<link rel="stylesheet" type="text/css" href="css/slider.css">
+<link href="css/layout.css" type="text/css" rel="stylesheet" />
+
+</head>
+<body>
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="query-plan"></div>
+    </div>
+</div>
+
+<div class="chart" style="display: false"></div>
+
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery.panzoom.min.js"></script>
+    <script src="js/jquery.timeago.js"></script>
+    <script src="js/lodash.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/d3.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/colorbrewer.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/d3.selection.popover.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/d3.selection.tooltip.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/chroma.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/graph.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/networkvis.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/fragmentvis.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/fragmentoverview.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/operatorvis.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/querystats.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/colorlegend.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/viz.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/slider.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/legend.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/graphAnimation.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="js/queryvis.js" charset="utf-8"></script>
+    <script src="js/profilingAggregation.js" type="text/javascript" charset="utf-8"></script>
+
+    <script async defer>
+        function instantiateInteractiveGraph(container) {
+            var queryStatus = {{ queryStatus | safe}};
+            var fragments = {{ fragments | safe }};
+            var totalTime = queryStatus.elapsedNanos;
+            var arrowSize = 9;
+            var markerSize = 14;
+            var nanosPerUnit = 1E9;
+            var updateInterval = 0.5;
+            var scales = {
+                strokeWidth: d3.scale.linear().range([2, 9]).clamp(true),
+                strokeDash: d3.scale.linear().range([6, 0]).domain([0, .8]).clamp(true),
+                timeColor: d3.scale.linear().domain([0, updateInterval * nanosPerUnit])
+                                            .interpolate(d3.interpolateHsl)
+                                            .range(["black", d3.rgb(128, 0, 38)])
+                                            .clamp(true),
+                timeWidth: d3.scale.linear().domain([0, updateInterval * nanosPerUnit])
+                                            .range([1, 10]).clamp(true),
+                skewBackgroundColor: d3.scale.pow().exponent(.25)
+                                                   .interpolate(d3.interpolateHsl)
+                                                   .range(["black", '#AAA']),
+                skewColor: d3.interpolateHsl("black", d3.rgb(227, 26, 28)),
+                skewWidth: d3.scale.linear().rangeRound([0, arrowSize * 2 - 4]).clamp(true)
+            };
+
+            queryGraphInteractive(container, queryStatus, fragments, function(graph, svg) {
+                profiler = new ProfilingAggregation (templates, myriaConnection, graph);
+                graphAnimation = new GraphAnimation(graph, scales, animationDuration, arrowSize, markerSize);
+
+                svg.call(graphAnimation.createSkewHighlightPaths);
+                svg.call(new Legend(scales, arrowSize, markerSize));
+                svg.call(new BrushSlider([0, totalTime / nanosPerUnit], updateInterval,
+                                         _.bind(updateGraph, graph, graph)));
+            });
+        }
+
+        function updateGraph(graph, slider) {
+            var range = [slider.value(), slider.value() + slider.interval()];
+
+            _.each(graph.nodes, function(fragment) {
+                profiler.fetchData(fragment, range, function(data, graph, fragment) {
+                    graphAnimation.update(data, profiler.aggregate(range, data), fragment);
+                });
+            })
+        }
+
+        d3.select('.query-plan').call(instantiateInteractiveGraph);
+    </script>
+</body>
+</html>
