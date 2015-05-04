@@ -39,6 +39,9 @@ function Legend (scales, arrowSize, markerSize, width, height, offset) {
           .tooltip("click to<br/>expand/collapse<br/>legend")
           .attr('id', 'toggle')
           .attr("class", "expand-circle")
+          .attr('fill', 'lightgreen')
+          .attr('stroke', 'green')
+          .attr('stroke-width', 2)
           .attr("r", 20)
           .attr('transform', 'translate(' + [width - 10, height - 10] + ')')
           .on("click", _.bind(toggleLegend, root.node(), root, height, width));
