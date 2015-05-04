@@ -38,20 +38,6 @@ Accordingly, the installation process requires the following steps:
 
 A [demo](http://ec2-52-4-143-15.compute-1.amazonaws.com/editor) of the dynamic query visualization is also available.  Some pre-profiled queries:
 
-#### [Finding all three-vertex sequences on a circumscribed Twitter connection graph](http://ec2-52-4-143-15.compute-1.amazonaws.com/profile?queryId=474) (7 seconds)
-
-```Python
-T1 = scan(TwitterK);
-T2 = scan(TwitterK);
-
-Joined = [from T1, T2
-          where T1.$1 = T2.$0
-          emit T1.$0 as src,
-               T2.$0 as first_link,
-               T2.$1 as destination];
-store(Joined, TwoHopsInTwitter);
-```
-
 [Visualization](http://ec2-52-4-143-15.compute-1.amazonaws.com/profile?queryId=474) (5 seconds)
 
 #### [Nested Cross-Products](http://ec2-52-4-143-15.compute-1.amazonaws.com/execution?queryId=9) (53 seconds)
@@ -87,6 +73,20 @@ store(Joined, ThreeHopsInTwitter);
 ```
 
 [Visualization](http://ec2-52-4-143-15.compute-1.amazonaws.com/profile?queryId=560) (3 minutes)
+
+#### [Finding all three-vertex sequences on a circumscribed Twitter connection graph](http://ec2-52-4-143-15.compute-1.amazonaws.com/profile?queryId=474) (7 seconds)
+
+```Python
+T1 = scan(TwitterK);
+T2 = scan(TwitterK);
+
+Joined = [from T1, T2
+          where T1.$1 = T2.$0
+          emit T1.$0 as src,
+               T2.$0 as first_link,
+               T2.$1 as destination];
+store(Joined, TwoHopsInTwitter);
+```
 
 ## Storyboard
 
