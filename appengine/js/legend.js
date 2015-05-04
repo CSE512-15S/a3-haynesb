@@ -1,7 +1,7 @@
 function Legend (scales, arrowSize, markerSize, width, height, offset) {
   "use strict";
 
-  width = width || 500;
+  width = width || 520;
   height = height || 95;
   offset = offset || 14;
 
@@ -39,10 +39,10 @@ function Legend (scales, arrowSize, markerSize, width, height, offset) {
           .tooltip("click to<br/>expand/collapse<br/>legend")
           .attr('id', 'toggle')
           .attr("class", "expand-circle")
+          .attr("r", 20)
           .attr('fill', 'lightgreen')
           .attr('stroke', 'green')
           .attr('stroke-width', 2)
-          .attr("r", 20)
           .attr('transform', 'translate(' + [width - 10, height - 10] + ')')
           .on("click", _.bind(toggleLegend, root.node(), root, height, width));
       root.append('text')
@@ -65,9 +65,9 @@ function Legend (scales, arrowSize, markerSize, width, height, offset) {
   };
 
   function tuplesEmittedLegend(scales, legend) {
-      legend.append('text').attr('transform', 'translate(0, 4)').text('No tuples emitted');
+      legend.append('text').attr('transform', 'translate(0, 4)').text('< 10% tuples emitted');
 
-      var margin = 10;
+      var margin = 11;
       var offset = _.reduce(scales.strokeWidth.ticks(15), function (offset, strokeWidth) {
           var width = 22 + 1.5 * scales.strokeDash(strokeWidth);
 
@@ -78,13 +78,13 @@ function Legend (scales, arrowSize, markerSize, width, height, offset) {
                 .attr("stroke-width", scales.strokeWidth(strokeWidth));
 
           return offset + width;
-      }, legend.select('text').node().getBoundingClientRect().width + margin);
+      }, legend.select('text').node().getBoundingClientRect().width + margin + 6);
 
-      legend.append('text').attr('transform', 'translate(' + (offset + margin - 12) + ', 4)').text('Most tuples emitted');
+      legend.append('text').attr('transform', 'translate(' + (offset + margin) + ', 4)').text('> 90% tuples emitted');
   }
 
   function operatorTimeLegend(scales, legend) {
-      legend.append('text').text('No time in operator');
+      legend.append('text').text('< 10% time in operator');
 
       var margin = 10;
       var offset = _.reduce(_.zip(scales.timeColor.ticks(9), scales.timeWidth.ticks(9)),
@@ -101,15 +101,15 @@ function Legend (scales, arrowSize, markerSize, width, height, offset) {
                             },
                             legend.select('text').node().getBoundingClientRect().width + margin);
 
-      legend.append('text').attr('transform', 'translate(' + (offset + margin) + ')').text('Most time in operator');
+      legend.append('text').attr('transform', 'translate(' + (offset + margin) + ')').text('> 90% time in operator');
   }
 
   function workerSkewLegend(scales, legend) {
       //todo var everything
-      var margin = 21;
+      var margin = 32;
       var separation = 60;
 
-      legend.append('text').text('Low worker skew');
+      legend.append('text').text('< 0.1 worker skew');
 
       var offset = _.reduce([0, 0.25, 0.5, 0.75, 1],
                             function (offset, skew) {
@@ -129,7 +129,7 @@ function Legend (scales, arrowSize, markerSize, width, height, offset) {
                             },
                             legend.select('text').node().getBoundingClientRect().width + margin);
 
-      legend.append('text').attr('transform', 'translate(' + (offset - separation + margin) + ')').text('Extreme worker skew');
+      legend.append('text').attr('transform', 'translate(' + (offset - separation + margin - 10) + ')').text('> 0.9 worker skew');
   }
 
   function toggleLegend(legend, height, width) {
